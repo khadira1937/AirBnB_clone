@@ -14,25 +14,29 @@ class FileStorage:
     __objects = {}
 
     def all(self):
+        """This method returns all objects"""
         return FileStorage.__objects
 
-    def new(self, obj):
-        ob_name = obj.__class__.__name__
-        FileStorage.__objects["{}.{}".format(ob_name, obj.id)] = obj
+    def new(self, arg):
+        """This method new sets a key for dictionary of the objects"""
+        objet = arg.__class__.__name__
+        FileStorage.__objects["{}.{}".format(objet, arg.id)] = arg
 
     def save(self):
-        o_dict = FileStorage.__objects
-        obj_dict = {obj: o_dict[obj].to_dict() for obj in o_dict.keys()}
-        with open(FileStorage.__file_path, "w") as f:
-            json.dump(obj_dict, f)
-
+        """The method save new objects as str in json file"""
+        serialization = {}
+        for k, v in FileStorage.__objects.items():
+            serialization[k] = v.to_dict()
+        with open(FileStorage.__file_path, "w") as file:
+            file.write(json.dumps(serialization))
     def reload(self):
+        """This method reload the dictionary from file"""
         try:
-            with open(FileStorage.__file_path) as f:
-                obj_dict = json.load(f)
-                for o in obj_dict.values():
-                    cls_name = o["__class__"]
+            with open(FileStorage.__file_path) as file:
+                dictionnaire = json.load(file)
+                for o in dictionnaire.values():
+                    classe = o["__class__"]
                     del o["__class__"]
-                    self.new(eval(cls_name)(**o))
+                    self.new(eval(classe)(**o))
         except FileNotFoundError:
             return
